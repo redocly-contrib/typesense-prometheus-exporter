@@ -83,3 +83,8 @@ typesense-prometheus-exporter [OPTIONS] --typesense-host <TYPESENSE_HOST> --type
 ## Todo
 - Add logging
 - Code cleanup
+
+## Publish a new image to Public Redocly ECR
+
+1. `aws ecr-public get-login-password --region us-east-1 --profile=redocly-prod | docker login --username AWS --password-stdin public.ecr.aws/d8n3m1t6`
+1. `docker buildx build --platform=linux/arm64,linux/arm64 -t public.ecr.aws/d8n3m1t6/typesense-prometheus-exporter:1.0.0 --push .`
