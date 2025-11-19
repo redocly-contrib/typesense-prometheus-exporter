@@ -1,11 +1,11 @@
 use std::sync::Arc;
 use std::time::Duration;
 
-use crate::{cli::CliArgs, typesense::models::typesense_stats_model::TypesenseStats};
+use crate::{cli::CliArgs, typesense::models::typesense_health_model::TypesenseHealth};
 use axum::Error;
 
-pub async fn get_typesense_stats(args: Arc<CliArgs>) -> Result<TypesenseStats, Error> {
-    let mut stats_data: TypesenseStats = TypesenseStats::default();
+pub async fn get_typesense_health(args: Arc<CliArgs>) -> Result<TypesenseHealth, Error> {
+    let mut health_data: TypesenseHealth = TypesenseHealth::default();
 
     let mut client_builder = reqwest::Client::builder();
     if args.typesense_timeout >= 0 {
@@ -14,39 +14,39 @@ pub async fn get_typesense_stats(args: Arc<CliArgs>) -> Result<TypesenseStats, E
     let client = client_builder.build().unwrap();
 
     let url = format!(
-        "{}://{}:{}/stats.json",
+        "{}://{}:{}/health",
         args.typesense_protocol, args.typesense_host, args.typesense_port
     );
 
     let res = match client
         .get(url)
-        .header("X-TYPESENSE-API-KEY", format!("{}", args.typesense_api_key))
         .send()
         .await
     {
         Ok(res) => res,
         Err(e) => {
-            println!("Stats endpoint: request failed (timeout/connection error): {:?}", e);
-            return Ok(stats_data);
+            println!("Health endpoint: request failed (timeout/connection error): {:?}", e);
+            return Ok(health_data);
         }
     };
 
     match res.status() {
         reqwest::StatusCode::OK => {
-            match res.json::<TypesenseStats>().await {
+            match res.json::<TypesenseHealth>().await {
                 Ok(parsed) => {
-                    stats_data = parsed;
+                    health_data = parsed;
                 }
-                Err(_) => println!("Hm, the response didn't match the shape we expected."),
+                Err(er) => println!(
+                    "Hm, the response didn't match the shape we expected. {:?}",
+                    er
+                ),
             };
-        }
-        reqwest::StatusCode::UNAUTHORIZED => {
-            println!("Need to grab a new token");
         }
         _ => {
             println!("Uh oh! Something unexpected happened.");
         }
     };
 
-    Ok(stats_data)
+    Ok(health_data)
 }
+

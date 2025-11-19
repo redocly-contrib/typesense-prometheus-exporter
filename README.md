@@ -72,6 +72,7 @@ typesense-prometheus-exporter [OPTIONS] --typesense-host <TYPESENSE_HOST> --type
 - `--typesense-protocol <TYPESENSE_PROTOCOL>`: Typesense protocol (env: TYPESENSE_PROTOCOL, default: http).
 - `--typesense-api-key <TYPESENSE_API_KEY>`: Typesense API key (env: TYPESENSE_API_KEY).
 - `--typesense-port <TYPESENSE_PORT>`: Typesense port number (env: TYPESENSE_PORT, default: 8108).
+- `--typesense-timeout <TYPESENSE_TIMEOUT>`: Timeout for Typesense API requests in seconds (env: TYPESENSE_TIMEOUT, default: -1 to disable).
 - `--exporter-bind-address <EXPORTER_BIND_ADDRESS>`: Internal server bind address (env: EXPORTER_BIND_ADDRESS, default: 0.0.0.0).
 - `--exporter-bind-port <EXPORTER_BIND_PORT>`: Internal server bind port (env: EXPORTER_BIND_PORT, default: 8888).
 
@@ -83,3 +84,11 @@ typesense-prometheus-exporter [OPTIONS] --typesense-host <TYPESENSE_HOST> --type
 ## Todo
 - Add logging
 - Code cleanup
+
+# Redocly
+
+## Pubslish to ECR repo
+
+1. `aws sso login --profile redocly-prod`
+2. `aws ecr-public get-login-password --region us-east-1 --profile=redocly-prod | docker login --username AWS --password-stdin public.ecr.aws/d8n3m1t6`
+3. `docker buildx build --platform linux/arm64 -t public.ecr.aws/d8n3m1t6/typesense-prometheus-exporter:2.0.0 --push .`
